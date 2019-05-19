@@ -34,6 +34,7 @@ struct problem {
 
 static void init_problem(struct problem *p) {
 	(void)memset(p, 0, sizeof (*p));
+	
 	return;
 }
 
@@ -299,16 +300,18 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							printf("\t\t\t1binsearch %d %u %u\n", bins, nextx, nexty); 
+							printf("\t\t\t1binsearch %d %u %u\n",
+									bins, nextx, nexty); 
 #endif
 							_three[1] = three[2];
 							_three[2].x = nextx;
 							_three[2].y = nexty;
 							cd = dist(_three + 1);
 							d = recurse_points(p, _three, 2, depth + 1);
-/*
-							printf("maxd = %f, cd = %f, d = %f\n", maxd, cd, d);
-*/
+#ifdef _DEBUG_
+							printf("maxd = %f, cd = %f, d = %f\n",
+									maxd, cd, d);
+#endif
 							if (d >= 0.0f) maxd = max2(maxd, cd + d);
 						}
 					}
@@ -327,7 +330,8 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							printf("\t\t\t2binsearch %d %u %u\n", bins, nextx, nexty); 
+							printf("\t\t\t2binsearch %d %u %u\n",
+									bins, nextx, nexty); 
 #endif
 							_three[0] = three[1];
 							_three[1] = three[2];
@@ -336,9 +340,10 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 							if (check(p, _three)) {
 								cd = dist(_three + 1);
 								d = recurse_points(p, _three, 3, depth + 1);
-/*
-								printf("maxd = %f, cd = %f, d = %f\n", maxd, cd, d);
-*/
+#ifdef _DEBUG_
+								printf("maxd = %f, cd = %f, d = %f\n",
+										maxd, cd, d);
+#endif
 								if (d >= 0.0f) maxd = max2(maxd, cd + d);
 							}
 						}
@@ -367,10 +372,10 @@ static void solve(struct problem *p, FILE *output) {
 	sort_Y(p);
 	
 #ifdef _DEBUG_
-	for (x = 0; x < USHRT_MAX; x++) {
+	for (x = 0u; x < USHRT_MAX; x++) {
 		if (p->X[x].Y) {
-			printf("%d : ", x);
-			for (y = 0; y < p->X[x].N; y++)
+			printf("%u : ", x);
+			for (y = 0u; y < p->X[x].N; y++)
 				printf("%hd ", p->X[x].Y[y]);
 			printf("\n");
 		}
