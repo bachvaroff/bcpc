@@ -207,7 +207,7 @@ static int check(struct problem *p, struct point *three) {
 	r = ((int32_t)three[1].y - (int32_t)three[0].y) * ((int32_t)three[2].x - (int32_t)three[1].x);
 	
 #ifdef _DEBUG_CHECK_
-	printf("\t\tcheck %d %d %d %hu %hu %hu %hu %hu %hu\n",
+	fprintf(stderr, "\t\tcheck %d %d %d %hu %hu %hu %hu %hu %hu ",
 			p->concave, l, r,
 			three[0].x, three[0].y,
 			three[1].x, three[1].y,
@@ -218,21 +218,21 @@ static int check(struct problem *p, struct point *three) {
 	if (p->concave) {
 		if (l < r) {
 #ifdef _DEBUG_CHECK_
-		printf("chk_yes\n");
+		fprintf(stderr, "chk_yes\n");
 #endif
 			return 1;
 		}
 	} else {
 		if (l > r) {
 #ifdef _DEBUG_CHECK_
-		printf("chk_yes\n");
+		fprintf(stderr, "chk_yes\n");
 #endif
 			return 1;
 		}
 	}
 	
 #ifdef _DEBUG_CHECK_
-	printf("chk_no\n");
+	fprintf(stderr, "chk_no\n");
 #endif
 	
 	return 0;
@@ -246,10 +246,10 @@ static float dist(struct point *two) {
 }
 
 #ifdef _DEBUG_
-static void print_point(struct point p) {
-	printf("(%hu %hu) ", p.x, p.y);
-	return;
-}
+#define print_point(POINT) \
+do {\
+	fprintf(stderr, "(%hu %hu) ", (POINT).x, (POINT).y); \
+} while (0)
 #endif
 
 static float max2(float max, float cd) {
@@ -269,16 +269,16 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 #ifdef _DEBUG_
 	if (valid) {
 		for (k = 0; k < depth; k++)
-			printf("\t");
-		printf("%d ", depth);
+			fprintf(stderr, "\t");
+		fprintf(stderr, "%d ", depth);
 		print_point(three[2]);
-		printf("\n");
+		fprintf(stderr, "\n");
 	}
 #endif
 	
 	if (valid && (three[2].x == p->omega.x) && (three[2].y == p->omega.y)) {
 #ifdef _DEBUG_
-		printf("<<<\n");
+		fprintf(stderr, "<<<\n");
 #endif
 		return 0.0f;
 	}
@@ -300,7 +300,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							printf("\t\t\t1binsearch %d %u %u\n",
+							fprintf(stderr, "\t\t\t1binsearch %d %u %u\n",
 									bins, nextx, nexty); 
 #endif
 							_three[1] = three[2];
@@ -309,7 +309,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 							cd = dist(_three + 1);
 							d = recurse_points(p, _three, 2, depth + 1);
 #ifdef _DEBUG_
-							printf("maxd = %f, cd = %f, d = %f\n",
+							fprintf(stderr, "maxd = %f, cd = %f, d = %f\n",
 									maxd, cd, d);
 #endif
 							if (d >= 0.0f) maxd = max2(maxd, cd + d);
@@ -330,7 +330,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							printf("\t\t\t2binsearch %d %u %u\n",
+							fprintf(stderr, "\t\t\t2binsearch %d %u %u\n",
 									bins, nextx, nexty); 
 #endif
 							_three[0] = three[1];
@@ -341,7 +341,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 								cd = dist(_three + 1);
 								d = recurse_points(p, _three, 3, depth + 1);
 #ifdef _DEBUG_
-								printf("maxd = %f, cd = %f, d = %f\n",
+								fprintf(stderr, "maxd = %f, cd = %f, d = %f\n",
 										maxd, cd, d);
 #endif
 								if (d >= 0.0f) maxd = max2(maxd, cd + d);
@@ -362,8 +362,8 @@ static void solve(struct problem *p, FILE *output) {
 	float maxd;
 	
 #ifdef _DEBUG_
-	printf("R %hd %hd concave %d\n", p->R.x, p->R.y, p->concave);
-	printf("alpha %hd %hd omega %hd %hd\n", p->alpha.x, p->alpha.y, p->omega.x, p->omega.y);
+	fprintf(stderr, "R %hd %hd concave %d\n", p->R.x, p->R.y, p->concave);
+	fprintf(stderr, "alpha %hd %hd omega %hd %hd\n", p->alpha.x, p->alpha.y, p->omega.x, p->omega.y);
 #endif
 	
 	assert(p->X[p->alpha.x].Y);
@@ -374,10 +374,10 @@ static void solve(struct problem *p, FILE *output) {
 #ifdef _DEBUG_
 	for (x = 0u; x < USHRT_MAX; x++) {
 		if (p->X[x].Y) {
-			printf("%u : ", x);
+			fprintf(stderr, "%u : ", x);
 			for (y = 0u; y < p->X[x].N; y++)
-				printf("%hd ", p->X[x].Y[y]);
-			printf("\n");
+				fprintf(stderr, "%hd ", p->X[x].Y[y]);
+			fprintf(stderr, "\n");
 		}
 	}
 #endif
@@ -386,7 +386,7 @@ static void solve(struct problem *p, FILE *output) {
 	
 	maxd = recurse_points(p, three, 0, 0);
 	
-	printf("%0.4f\n", maxd);
+	fprintf(output, "%0.4f\n", maxd);
 	
 	return;
 }
@@ -412,7 +412,7 @@ int main(void) {
 		case INITIAL:
 			parse_1(line, &T);
 #ifdef _DEBUG_
-			printf("%d\n", T);
+			fprintf(stderr, "%d\n", T);
 #endif
 			s = RESTRICTION;
 			break;
