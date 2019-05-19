@@ -115,15 +115,15 @@ static void parse_3(char *s, uint16_t *x, uint16_t *y, int *N) {
 static void do_realloc(struct problem *p, uint16_t x) {
 	uint16_t *t;
 	
-	assert((t = realloc(p->X[x].Y, p->X[x].size + 1024u / sizeof (uint16_t))));
-	p->X[x].size += 1024u / sizeof (uint16_t);
+	assert((t = realloc(p->X[x].Y, p->X[x].size + 1024u * sizeof (uint16_t))));
+	p->X[x].size += 1024u * sizeof (uint16_t);
 	p->X[x].Y = t;
 	
 	return;
 }
 
 static void update(struct problem *p, uint16_t x, uint16_t y) {
-	if ((p->X[x].N + 1u) >= p->X[x].size / sizeof (uint16_t)) do_realloc(p, x);
+	if ((p->X[x].N + 1u) >= (p->X[x].size / sizeof (uint16_t))) do_realloc(p, x);
 	p->X[x].Y[p->X[x].N] = y;
 	p->X[x].N++;
 	return;
@@ -350,7 +350,9 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 }
 
 static void solve(struct problem *p, FILE *output) {
+#ifdef _DEBUG_
 	uint32_t x, y;
+#endif
 	struct point three[3];
 	float maxd;
 	
