@@ -1,5 +1,6 @@
 #!/bin/sh
 
+rm -f problem
 cc problem.c -o problem -lm
 
 rm -f output_*
