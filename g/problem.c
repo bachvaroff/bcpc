@@ -132,8 +132,10 @@ static void do_realloc(struct problem *p, uint16_t x) {
 
 static void update(struct problem *p, uint16_t x, uint16_t y) {
 	if ((p->X[x].N + 1u) >= (p->X[x].size / sizeof (uint16_t))) do_realloc(p, x);
+	
 	p->X[x].Y[p->X[x].N] = y;
 	p->X[x].N++;
+	
 	return;
 }
 
