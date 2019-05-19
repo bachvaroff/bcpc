@@ -403,13 +403,14 @@ int main(void) {
 	output = stdout;
 	
 	while (getline(&line, &len, input) >= 0) {
-		if (s == INITIAL) {
+		switch (s) {
+		case INITIAL:
 			parse_1(line, &T);
 #ifdef _DEBUG_
 			printf("%d\n", T);
 #endif
 			s = RESTRICTION;
-		} else switch (s) {
+			break;
 		case RESTRICTION:
 			convex = strstr(line, "convex");
 			concave = strstr(line, "concave");
@@ -434,6 +435,8 @@ int main(void) {
 			}
 			update(p, x, y);
 			j++;
+			break;
+		default:
 			break;
 		}
 		if (s == FINAL) {
