@@ -18,6 +18,13 @@ struct point {
 	uint16_t y;
 };
 
+#ifdef _DEBUG_
+#define print_point(POINT) \
+do { \
+	fprintf(stderr, "(%hu, %hu) ", (POINT).x, (POINT).y); \
+} while (0)
+#endif
+
 struct Ys {
 	uint16_t *Y;
 	size_t N, size;
@@ -244,13 +251,6 @@ static float dist(struct point *two) {
 			((float)two[0].y - (float)two[1].y) * ((float)two[0].y - (float)two[1].y)
 	);
 }
-
-#ifdef _DEBUG_
-#define print_point(POINT) \
-do {\
-	fprintf(stderr, "(%hu %hu) ", (POINT).x, (POINT).y); \
-} while (0)
-#endif
 
 static float max2(float max, float cd) {
 	return (max > cd) ? max : cd;
