@@ -457,6 +457,7 @@ int main(void) {
 	
 	cleanup(p);
 	free(p);
+	free(line);
 	
 	return 0;
 }
