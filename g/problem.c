@@ -157,24 +157,19 @@ static void sort_Y(struct problem *p) {
 	return;
 }
 
-static int binsearch(const uint16_t *Y, const size_t N, const uint16_t v) {
-	size_t B, E, p;
+static int compare_u16(const void *_Y0, const void *_Y1) {
+	const uint16_t *Y0 = _Y0, *Y1 = _Y1;
 	
-	if (N == 1u) {
-		if (Y[0] == v) return 0;
-		else return -1;
-	}
+	if (*Y0 == *Y1) return 0;
+	else if (*Y0 < *Y1) return -1;
+	else return 1;
+}
+
+static long binsearch(const uint16_t *Y, const size_t N, const uint16_t _v) {
+	uint16_t v = _v, *pv = &v, *r;
 	
-	for (B = 0u, E = N - 1u; B <= E; ) {
-		p = B + (E - B) / 2u;
-		if (Y[p] == v) return p;
-		else if (B == E) break;
-		else if (Y[p] > v) E = p - 1u;
-		else B = p + 1u;
-		if (B >= N) break;
-	}
-	
-	return -1;
+	if (!(r = bsearch(pv, Y, N, sizeof (uint16_t), compare_u16))) return -1;
+	else return r - Y;
 }
 
 #define COORD(T, X, Y, XS) \
@@ -265,7 +260,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 #ifdef _DEBUG_
 	int k;
 #endif
-	int bins;
+	long bins;
 	float d, cd, maxd = -1.0f;
 	
 #ifdef _DEBUG_
@@ -302,7 +297,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							fprintf(stderr, "\t\t\t1binsearch %d %u %u\n",
+							fprintf(stderr, "\t\t\t1binsearch %ld %u %u\n",
 									bins, nextx, nexty); 
 #endif
 							_three[1] = three[2];
@@ -332,7 +327,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							fprintf(stderr, "\t\t\t2binsearch %d %u %u\n",
+							fprintf(stderr, "\t\t\t2binsearch %ld %u %u\n",
 									bins, nextx, nexty); 
 #endif
 							_three[0] = three[1];
