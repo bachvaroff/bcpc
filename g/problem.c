@@ -156,7 +156,7 @@ static void sort_Y(struct problem *p) {
 	return;
 }
 
-static long binsearch(const uint16_t *Y, const size_t N, const uint16_t _v) {
+static long search_Y(const uint16_t *Y, const size_t N, const uint16_t _v) {
 	uint16_t v = _v, *pv = &v, *r;
 	
 	if (!(r = bsearch(pv, Y, N, sizeof (uint16_t), compare_u16))) return -1;
@@ -285,10 +285,10 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 							p->X[nextx].Y &&
 							(nextx <= p->omega.x) &&
 							(nexty <= p->omega.y)) {
-						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
+						if ((bins = search_Y(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							fprintf(stderr, "\t\t\t1binsearch %ld %u %u\n",
+							fprintf(stderr, "\t\t\t1search_Y %ld %u %u\n",
 									bins, nextx, nexty); 
 #endif
 							_three[1] = three[2];
@@ -315,10 +315,10 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 							p->X[nextx].Y &&
 							(nextx <= p->omega.x) &&
 							(nexty <= p->omega.y)) {
-						if ((bins = binsearch(p->X[nextx].Y, p->X[nextx].N,
+						if ((bins = search_Y(p->X[nextx].Y, p->X[nextx].N,
 								(uint16_t)nexty)) >= 0) {
 #ifdef _DEBUG_
-							fprintf(stderr, "\t\t\t2binsearch %ld %u %u\n",
+							fprintf(stderr, "\t\t\t2search_Y %ld %u %u\n",
 									bins, nextx, nexty); 
 #endif
 							_three[0] = three[1];
