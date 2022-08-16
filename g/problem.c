@@ -139,30 +139,21 @@ static void update(struct problem *p, uint16_t x, uint16_t y) {
 	return;
 }
 
-static int compare(const void *_l, const void *_r) {
-	uint16_t *l = (uint16_t *)_l;
-	uint16_t *r = (uint16_t *)_r;
-	
-	if (*l > *r) return 1;
-	else if (*l < *r) return -1;
-	else return 0;
-}
-
-static void sort_Y(struct problem *p) {
-	size_t x;
-	
-	for (x = 0u; x < USHRT_MAX; x++)
-		if (p->X[x].Y) qsort(p->X[x].Y, p->X[x].N, sizeof (*p->X[x].Y), compare);
-	
-	return;
-}
-
 static int compare_u16(const void *_Y0, const void *_Y1) {
 	const uint16_t *Y0 = _Y0, *Y1 = _Y1;
 	
 	if (*Y0 == *Y1) return 0;
 	else if (*Y0 < *Y1) return -1;
 	else return 1;
+}
+
+static void sort_Y(struct problem *p) {
+	size_t x;
+	
+	for (x = 0u; x < USHRT_MAX; x++)
+		if (p->X[x].Y) qsort(p->X[x].Y, p->X[x].N, sizeof (*p->X[x].Y), compare_u16);
+	
+	return;
 }
 
 static long binsearch(const uint16_t *Y, const size_t N, const uint16_t _v) {
