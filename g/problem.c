@@ -18,13 +18,6 @@ struct point {
 	uint16_t y;
 };
 
-#ifdef _DEBUG_
-#define print_point(POINT) \
-do { \
-	fprintf(stderr, "(%hu, %hu) ", (POINT).x, (POINT).y); \
-} while (0)
-#endif
-
 struct Ys {
 	uint16_t *Y;
 	size_t N, size;
@@ -123,15 +116,15 @@ static void parse_3(char *s, uint16_t *x, uint16_t *y, int *N) {
 static void do_realloc(struct problem *p, uint16_t x) {
 	uint16_t *t;
 	
-	assert((t = realloc(p->X[x].Y, p->X[x].size + 1024u * sizeof (uint16_t))));
-	p->X[x].size += 1024u * sizeof (uint16_t);
+	assert((t = realloc(p->X[x].Y, p->X[x].size + 1024lu * sizeof (uint16_t))));
+	p->X[x].size += 1024lu * sizeof (uint16_t);
 	p->X[x].Y = t;
 	
 	return;
 }
 
 static void update(struct problem *p, uint16_t x, uint16_t y) {
-	if ((p->X[x].N + 1u) >= (p->X[x].size / sizeof (uint16_t))) do_realloc(p, x);
+	if ((p->X[x].N + 1lu) >= (p->X[x].size / sizeof (uint16_t))) do_realloc(p, x);
 	
 	p->X[x].Y[p->X[x].N] = y;
 	p->X[x].N++;
@@ -200,44 +193,21 @@ static int check(struct problem *p, struct point *three) {
 	
 	l = ((int32_t)three[2].y - (int32_t)three[1].y) * ((int32_t)three[1].x - (int32_t)three[0].x);
 	r = ((int32_t)three[1].y - (int32_t)three[0].y) * ((int32_t)three[2].x - (int32_t)three[1].x);
-	
-#ifdef _DEBUG_CHECK_
-	fprintf(stderr, "\t\tcheck %d %d %d %hu %hu %hu %hu %hu %hu ",
-			p->concave, l, r,
-			three[0].x, three[0].y,
-			three[1].x, three[1].y,
-			three[2].x, three[2].y);
-#endif
-	
-	
+		
 	if (p->concave) {
-		if (l < r) {
-#ifdef _DEBUG_CHECK_
-		fprintf(stderr, "chk_yes\n");
-#endif
-			return 1;
-		}
+		if (l < r) return 1;
 	} else {
-		if (l > r) {
-#ifdef _DEBUG_CHECK_
-		fprintf(stderr, "chk_yes\n");
-#endif
-			return 1;
-		}
+		if (l > r) return 1;
 	}
-	
-#ifdef _DEBUG_CHECK_
-	fprintf(stderr, "chk_no\n");
-#endif
 	
 	return 0;
 }
 
 static float dist(struct point *two) {
-	return sqrtf(
-			((float)two[0].x - (float)two[1].x) * ((float)two[0].x - (float)two[1].x) +
-			((float)two[0].y - (float)two[1].y) * ((float)two[0].y - (float)two[1].y)
-	);
+	float dx = (float)two[0].x - (float)two[1].x;
+	float dy = (float)two[0].y - (float)two[1].y;
+	
+	return sqrtf(dx * dx + dy * dy);
 }
 
 static float max2(float max, float cd) {
@@ -248,127 +218,49 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 	struct point _three[3];
 	uint32_t i, j;
 	uint32_t nextx, nexty;
-#ifdef _DEBUG_
-	int k;
-#endif
 	long bins;
 	float d, cd, maxd = -1.0f;
-	
-#ifdef _DEBUG_
-	if (valid) {
-		for (k = 0; k < depth; k++)
-			fprintf(stderr, "\t");
-		fprintf(stderr, "%d ", depth);
-		print_point(three[2]);
-		fprintf(stderr, "\n");
-	}
-#endif
-	
-	if (valid && (three[2].x == p->omega.x) && (three[2].y == p->omega.y)) {
-#ifdef _DEBUG_
-		fprintf(stderr, "<<<\n");
-#endif
-		return 0.0f;
-	}
-	
+	int go3;
+		
 	if (!valid) {
 		_three[2] = p->alpha;
 		return recurse_points(p, _three, 1, depth + 1);
-	} else if (valid == 1) {
-		for (i = 0u; i < p->R.y; i++) {
-			for (j = 0u; j < p->R.x; j++)
-				if (COORD(p->r, j, i, p->R.x)) {
-					nextx = (uint32_t)three[2].x + j;
-					nexty = (uint32_t)three[2].y + i;
-					if ((nextx < USHRT_MAX) && (nexty < USHRT_MAX) &&
-							p->X[nextx].Y &&
-							(nextx <= p->omega.x) &&
-							(nexty <= p->omega.y)) {
-						if ((bins = search_Y(p->X[nextx].Y, p->X[nextx].N,
-								(uint16_t)nexty)) >= 0) {
-#ifdef _DEBUG_
-							fprintf(stderr, "\t\t\t1search_Y %ld %u %u\n",
-									bins, nextx, nexty); 
-#endif
-							_three[1] = three[2];
-							_three[2].x = nextx;
-							_three[2].y = nexty;
-							cd = dist(_three + 1);
-							d = recurse_points(p, _three, 2, depth + 1);
-#ifdef _DEBUG_
-							fprintf(stderr, "maxd = %f, cd = %f, d = %f\n",
-									maxd, cd, d);
-#endif
-							if (d >= 0.0f) maxd = max2(maxd, cd + d);
-						}
+	} else {
+		if ((three[2].x == p->omega.x) && (three[2].y == p->omega.y)) return 0.0f;
+		go3 = (valid >= 2);
+		for (i = 0u; i < p->R.y; i++)
+			for (j = 0u; j < p->R.x; j++) {
+				if (!COORD(p->r, j, i, p->R.x)) continue;
+				nextx = (uint32_t)three[2].x + j;
+				nexty = (uint32_t)three[2].y + i;
+				if ((nextx > p->omega.x) && (nexty > p->omega.y)) continue;
+				if (!p->X[nextx].Y) continue;
+				if (search_Y(p->X[nextx].Y, p->X[nextx].N, (uint16_t)nexty) >= 0) {
+					_three[0] = three[1];
+					_three[1] = three[2];
+					_three[2].x = nextx;
+					_three[2].y = nexty;
+					if ((go3 ? check(p, _three) : 1)) {
+						cd = dist(_three + 1);
+						d = recurse_points(p, _three, go3 ? 3 : 2, depth + 1);
+						if (d >= 0.0f) maxd = max2(maxd, cd + d);
 					}
 				}
-		}
-	} else if (valid >= 2) {
-		for (i = 0; i < p->R.y; i++) {
-			for (j = 0; j < p->R.x; j++)
-				if (COORD(p->r, j, i, p->R.x)) {
-					nextx = (uint32_t)three[2].x + j;
-					nexty = (uint32_t)three[2].y + i;
-					if ((nextx < USHRT_MAX) && (nexty < USHRT_MAX) &&
-							p->X[nextx].Y &&
-							(nextx <= p->omega.x) &&
-							(nexty <= p->omega.y)) {
-						if ((bins = search_Y(p->X[nextx].Y, p->X[nextx].N,
-								(uint16_t)nexty)) >= 0) {
-#ifdef _DEBUG_
-							fprintf(stderr, "\t\t\t2search_Y %ld %u %u\n",
-									bins, nextx, nexty); 
-#endif
-							_three[0] = three[1];
-							_three[1] = three[2];
-							_three[2].x = nextx;
-							_three[2].y = nexty;
-							if (check(p, _three)) {
-								cd = dist(_three + 1);
-								d = recurse_points(p, _three, 3, depth + 1);
-#ifdef _DEBUG_
-								fprintf(stderr, "maxd = %f, cd = %f, d = %f\n",
-										maxd, cd, d);
-#endif
-								if (d >= 0.0f) maxd = max2(maxd, cd + d);
-							}
-						}
-					}
-				}
-		}
+			}
 	}
+	
 	return maxd;
 }
 
 static void solve(struct problem *p, FILE *output) {
-#ifdef _DEBUG_
-	uint32_t x, y;
-#endif
 	struct point three[3];
 	float maxd;
-	
-#ifdef _DEBUG_
-	fprintf(stderr, "R %hd %hd concave %d\n", p->R.x, p->R.y, p->concave);
-	fprintf(stderr, "alpha %hd %hd omega %hd %hd\n", p->alpha.x, p->alpha.y, p->omega.x, p->omega.y);
-#endif
-	
+		
 	assert(p->X[p->alpha.x].Y);
 	assert(p->X[p->omega.x].Y);
 	
 	sort_Y(p);
-	
-#ifdef _DEBUG_
-	for (x = 0u; x < USHRT_MAX; x++) {
-		if (p->X[x].Y) {
-			fprintf(stderr, "%u : ", x);
-			for (y = 0u; y < p->X[x].N; y++)
-				fprintf(stderr, "%hd ", p->X[x].Y[y]);
-			fprintf(stderr, "\n");
-		}
-	}
-#endif
-	
+		
 	assert((p->r = init_restriction(p)));
 	
 	maxd = recurse_points(p, three, 0, 0);
@@ -398,9 +290,6 @@ int main(void) {
 		switch (s) {
 		case INITIAL:
 			parse_1(line, &T);
-#ifdef _DEBUG_
-			fprintf(stderr, "%d\n", T);
-#endif
 			s = RESTRICTION;
 			break;
 		case RESTRICTION:
