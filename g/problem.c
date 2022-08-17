@@ -149,11 +149,10 @@ static void sort_Y(struct problem *p) {
 	return;
 }
 
-static long search_Y(const uint16_t *Y, const size_t N, const uint16_t _v) {
-	uint16_t v = _v, *pv = &v, *r;
+static uint16_t *search_Y(const uint16_t *Y, const size_t N, const uint16_t _v) {
+	uint16_t v = _v, *pv = &v;
 	
-	if (!(r = bsearch(pv, Y, N, sizeof (uint16_t), compare_u16))) return -1;
-	else return r - Y;
+	return bsearch(pv, Y, N, sizeof (*pv), compare_u16);
 }
 
 #define COORD(T, X, Y, XS) \
@@ -220,14 +219,12 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 	uint32_t nextx, nexty;
 	long bins;
 	float d, cd, maxd = -1.0f;
-	int go3;
 		
 	if (!valid) {
 		_three[2] = p->alpha;
 		return recurse_points(p, _three, 1, depth + 1);
 	} else {
 		if ((three[2].x == p->omega.x) && (three[2].y == p->omega.y)) return 0.0f;
-		go3 = (valid >= 2);
 		for (i = 0u; i < p->R.y; i++)
 			for (j = 0u; j < p->R.x; j++) {
 				if (!COORD(p->r, j, i, p->R.x)) continue;
@@ -235,14 +232,14 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 				nexty = (uint32_t)three[2].y + i;
 				if ((nextx > p->omega.x) && (nexty > p->omega.y)) continue;
 				if (!p->X[nextx].Y) continue;
-				if (search_Y(p->X[nextx].Y, p->X[nextx].N, (uint16_t)nexty) >= 0) {
+				if (search_Y(p->X[nextx].Y, p->X[nextx].N, (uint16_t)nexty)) {
 					_three[0] = three[1];
 					_three[1] = three[2];
 					_three[2].x = nextx;
 					_three[2].y = nexty;
-					if ((go3 ? check(p, _three) : 1)) {
+					if (((valid >= 2) ? check(p, _three) : 1)) {
 						cd = dist(_three + 1);
-						d = recurse_points(p, _three, go3 ? 3 : 2, depth + 1);
+						d = recurse_points(p, _three, (valid >= 2) ? 3 : 2, depth + 1);
 						if (d >= 0.0f) maxd = max2(maxd, cd + d);
 					}
 				}
