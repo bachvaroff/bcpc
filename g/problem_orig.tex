@@ -1,0 +1,84 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools,etoolbox,tabto}
+\DeclarePairedDelimiterX{\abs}[1]{\lvert}{\rvert}{\ifblank{#1}{{}\cdot{}}{#1}}
+\makeatletter
+\def\Arg{\mathop{\operator@font Arg}\nolimits}
+\def\pv{\mathop{\operator@font pv}\nolimits}
+\makeatother
+\begin{document}
+\underline{\textbf{CURVES}}
+
+Let \textbf{C} be a cloud of \textbf{N} points $X(x, y)$, where $x$ and $y$ are 16-bit unsigned integers.
+
+Let $X_\alpha(x_\alpha, y_\alpha)$ be an initial point and, likewise, let $X_\omega(x_\omega, y_\omega)$ be a final point ($x_\alpha \ll x_\omega$ and $y_\alpha \ll y_\omega$).
+
+Your task is to find a \underline{strictly} monotonic sequence of points in \textbf{C}, $\{X_i\}|_\alpha^\omega$, which is either concave or convex, such that the sum of the lengths (in the Euclidean distance) of all sequential pairs $\{X_k, X_{k+1} \in \{X_i\}$, $\alpha \le k < \omega\}$ is maximal in the restriction $\{\Delta x < R_x$, $\Delta y < R_y\}$.
+
+Given three consequent elements of $\{X_i\}$, e.g. $X_{j-1}$, $X_j$ and $X_{j+1}$, and considering the line $(X_{j-1}, X_{j+1})$, then $\{X_i\}$ is concave if $X_j$ is above the named line and convex if $X_j$ is below the line.
+
+If $\{X_k(x_k, y_k), X_{k+1}(x_{k+1}, y_{k+1}) \in \{X_i\} : (\alpha \le k < \omega) \iff ((x_k < x_{k+1}) \land (y_k < y_{k+1}))\}$, then $\{X_i\}$ is a \underline{strictly} monotonic sequence.
+
+Input file "input\_curves":
+
+$\;\;Row_0 | Set_0:0\, R_x\, R_y$
+
+$\;\;Row_1 | Set_0:0\, x\, y$
+
+$\;\;Row_2 | Set_0:0\, x\, y$
+
+$\;\;\ldots$
+
+$\;\;Row_{{final}_0-1} | Set_0:0\, x\, y$
+
+$\;\;Row_{{final}_0} | Set_0:0\, x_\alpha\, y_\alpha\, x_\omega\, y_\omega\, convex|concave$
+
+$\;\;Row_{{final}_0+1} | Set_1:1\, R_x\, R_y$
+
+$\;\;Row_{{final}_0+2} | Set_1:1\, x\, y$
+
+$\;\;Row_{{final}_0+3} | Set_1:1\, x\, y$
+
+$\;\;\ldots$
+
+$\;\;Row_{{final}_1-1} | Set_1:1\, x\, y$
+
+$\;\;Row_{{final}_1} | Set_1:1\, x_\alpha\, y_\alpha\, x_\omega\, y_\omega\, convex|concave$
+
+$\;\;\ldots$
+
+Output file "output\_curves":
+
+$\;\;Row_0 | Set_0:0\, length$
+
+$\;\;Row_1 | Set_0:0\, x_\alpha\, y_\alpha$
+
+$\;\;Row_2 | Set_0:0\, x\, y$
+
+$\;\;Row_3 | Set_0:0\, x\, y$
+
+$\;\;\ldots$
+
+$\;\;Row_{{final}_0-1} | Set_0:0\, x\, y$
+
+$\;\;Row_{{final}_0} | Set_0:0\, x_\omega\, y_\omega$
+
+$\;\;Row_{{final}_0+1} | Set_1:1\, length$
+
+$\;\;Row_{{final}_0+2} | Set_1:1\, x_\alpha\, y_\alpha$
+
+$\;\;Row_{{final}_0+3} | Set_1:1\, x\, y$
+
+$\;\;Row_{{final}_0+4} | Set_1:1\, x\, y$
+
+$\;\;\ldots$
+
+$\;\;Row_{{final}_1-1} | Set_1:1\, x\, y$
+
+$\;\;Row_{{final}_1} | Set_1:1\, x_\omega\, y_\omega$
+
+$\;\;\ldots$
+
+Should there be no such sequence $\{X_i\}|_\alpha^\omega$, you should output a single line "set\_number NO" in "output\_curves".
+\end{document}
+
