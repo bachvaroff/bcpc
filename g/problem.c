@@ -272,8 +272,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 	}
 	
 	if (!valid) {
-		_three[2].x = p->alpha.x;
-		_three[2].y = p->alpha.y;
+		_three[2] = p->alpha;
 		return recurse_points(p, _three, 1, depth + 1);
 	} else if (valid == 1) {
 		for (i = 0u; i < p->R.y; i++) {
