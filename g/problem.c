@@ -217,7 +217,6 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 	struct point _three[3];
 	uint32_t i, j;
 	uint32_t nextx, nexty;
-	long bins;
 	float d, cd, maxd = -1.0f;
 		
 	if (!valid) {
@@ -225,12 +224,13 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 		return recurse_points(p, _three, 1, depth + 1);
 	} else {
 		if ((three[2].x == p->omega.x) && (three[2].y == p->omega.y)) return 0.0f;
-		for (i = 0u; i < p->R.y; i++)
+		for (i = 0u; i < p->R.y; i++) {
+			nexty = (uint32_t)three[2].y + i;
+			if (nexty > p->omega.y) continue;
 			for (j = 0u; j < p->R.x; j++) {
 				if (!COORD(p->r, j, i, p->R.x)) continue;
 				nextx = (uint32_t)three[2].x + j;
-				nexty = (uint32_t)three[2].y + i;
-				if ((nextx > p->omega.x) && (nexty > p->omega.y)) continue;
+				if (nextx > p->omega.x) continue;
 				if (!p->X[nextx].Y) continue;
 				if (search_Y(p->X[nextx].Y, p->X[nextx].N, (uint16_t)nexty)) {
 					_three[0] = three[1];
@@ -244,6 +244,7 @@ static float recurse_points(struct problem *p, struct point *three, int valid, i
 					}
 				}
 			}
+		}
 	}
 	
 	return maxd;
@@ -332,4 +333,3 @@ int main(void) {
 	
 	return 0;
 }
-
